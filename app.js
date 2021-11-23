@@ -5,6 +5,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const session = require('express-session');
 
+require('dotenv').config();
+
+var pool = require('./models/bd');
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var novedadesRouter = require('./routes/novedades');
@@ -60,6 +64,13 @@ app.use('/productos', productosRouter);
 app.use('/novedades', novedadesRouter);
 app.use('/nosotros', nosotrosRouter);
 app.use('/contacto', contactoRouter);
+
+//select
+
+pool.query('select nombre, apellido from empleados where id_empleado = 2').then
+(function (resultados) {
+  console.log(resultados)
+});
 
 
 // catch 404 and forward to error handler

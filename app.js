@@ -15,7 +15,8 @@ var novedadesRouter = require('./routes/novedades');
 var productosRouter = require('./routes/productos');
 var nosotrosRouter = require('./routes/nosotros');
 var contactoRouter = require('./routes/contacto');
-
+var loginRouter = require('./routes/admin/login');
+var adminRouter = require('./routes/admin/novedades');
 
 var app = express();
 
@@ -35,27 +36,18 @@ app.use(session({
   saveUninitialized: true,
 }))
 
-app.get('/', function (req, res) {
-  var conocido = Boolean(req.session.nombre);
-
-  res.render('index', {
-    title: 'Administrador Tecno Tools',
-    conocido: conocido,
-    nombre: req.session.nombre
-  });
-});   
-
-app.post('/ingresar', function (req, res) {
-  if (req.body.nombre) {
-    req.session.nombre = req.body.nombre
+secured = async (req, res, next) => {
+  try{
+    console.log(req.session.id_usuario);
+    if (req.session.id_usuario) {
+      next();
+    } else {
+      res.redirect('/admin/login');
+    }
+  } catch(error) {
+    console.log(error);
   }
-  res.redirect('/');
-})
-
-app.get('/salir', function (req, res) {
-  req.session.destroy();
-  res.redirect('/');
-})
+}
 
 
 app.use('/', indexRouter);
@@ -64,14 +56,10 @@ app.use('/productos', productosRouter);
 app.use('/novedades', novedadesRouter);
 app.use('/nosotros', nosotrosRouter);
 app.use('/contacto', contactoRouter);
+app.use('/admin/login', loginRouter);
+app.use('/admin/novedades', secured, adminRouter);
 
 //select
-
-pool.query('select nombre, apellido from empleados where id_empleado = 2').then
-(function (resultados) {
-  console.log(resultados)
-});
-
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
